@@ -1,0 +1,34 @@
+spring:
+  mvc:
+    servlet:
+      load-on-startup: 1
+    problemdetails:
+      enabled: true
+  application:
+    name: conversion-api-gateway
+  rabbitmq:
+    host: localhost
+    username: admin
+    password: admin
+    connection-timeout: 2s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 16
+
+server:
+  port: 8080
+
+converter:
+  max-xml-size: 1MB
+  rabbit:
+    exchange: converter.exchange
+    requests-queue: xml.conversion.requests
+    results-queue: json.conversion.results
+    requested-key: conversion.requested
+    completed-key: conversion.completed
+    publish-confirm-timeout: 750ms

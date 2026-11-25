@@ -1,0 +1,35 @@
+name: xml-json-conversion
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  conversion-api-gateway:
+    build: ./conversion-api-gateway
+    ports:
+      - "8080:8080"
+    environment: &rabbitmq-environment
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: admin
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  xml-to-json-converter:
+    build: ./xml-to-json-converter
+    environment: *rabbitmq-environment
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
